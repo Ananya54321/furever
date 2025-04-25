@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import StoreNavbar from "@/components/pages/store/StoreNavbar";
 import { fetchProducts } from "../../../actions/storeActions";
 
 const products = [
@@ -73,23 +73,8 @@ export default function StorePage() {
   return (
     <div className="min-h-screen bg-[#E3DAC9]">
       {/* Navigation Bar */}
-      <nav className="bg-[#355E3B] text-[#E3DAC9] p-4 shadow-md flex justify-between items-center">
-        <h1 className="text-2xl font-bold">The Cozy Store 🛍️</h1>
-        <div className="flex gap-4">
-          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
-            <Home className="mr-2" size={16} /> Home
-          </Button>
-          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
-            <ShoppingCart className="mr-2" size={16} /> Cart ({cart.length})
-          </Button>
-          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
-            <CreditCard className="mr-2" size={16} /> Checkout
-          </Button>
-          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
-            <LogOut className="mr-2" size={16} /> Logout
-          </Button>
-        </div>
-      </nav>
+
+      <StoreNavbar />
 
       {/* Store Content */}
       <div className="max-w-6xl mx-auto p-8">

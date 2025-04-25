@@ -181,8 +181,7 @@ export default function AddProductPage() {
             onClick={() => {
               logout();
               toast.success("Logout successful");
-            }}
-          >
+            }}>
             Logout
           </Button>
           <Avatar>
@@ -202,8 +201,7 @@ export default function AddProductPage() {
             <form
               onSubmit={handleSubmit}
               className="space-y-4"
-              encType="multipart/form-data"
-            >
+              encType="multipart/form-data">
               <Input
                 type="text"
                 name="name"
