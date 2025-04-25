@@ -1,10 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dx0o34ckc",
-  api_key: process.env.CLOUDINARY_API_KEY || "944247377554193",
+  cloud_name: process.env.ECOMMERCE_CLOUDINARY_CLOUD_NAME ,
+  api_key: process.env.ECOMMERCE_CLOUDINARY_API_KEY ,
   api_secret:
-    process.env.CLOUDINARY_API_SECRET || "BUKc9458wGt5V7PGHcYEK4X5kww",
+    process.env.ECOMMERCE_CLOUDINARY_API_SECRET,
 });
 
 export const config = {
@@ -17,11 +17,15 @@ export const config = {
 
 export async function POST(req) {
   try {
+    // console.log("POST request received");
     const { base64 } = await req.json();
+    // console.log("Base64:", base64);
 
     const uploadResponse = await cloudinary.uploader.upload(base64, {
       folder: "pet-store/products", // optional folder name
     });
+
+    // console.log("Cloudinary Upload Response:");
 
     return new Response(JSON.stringify({ url: uploadResponse.secure_url }), {
       status: 200,
