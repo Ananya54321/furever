@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import StoreNavbar from "@/components/pages/store/StoreNavbar";
 import { fetchProducts } from "../../../actions/storeActions";
 import { getAuthenticatedUser } from "../../../actions/loginActions";
 import { buyNow, addToCart as addToCartAction, getCartSize } from "./functions";
@@ -83,59 +83,10 @@ export default function StorePage() {
 
   return (
     <div className="min-h-screen bg-[#E3DAC9]">
-      {/* Navbar */}
-      <nav className="bg-[#355E3B] text-[#E3DAC9] p-4 shadow-md flex justify-between items-center relative">
-        <h1 className="text-2xl font-bold">The Cozy Store 🍭️</h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="p-2 rounded-md border-none focus:outline-none text-black"
-            />
-            <Search className="absolute top-2 right-2 text-gray-500" size={16} />
-            {filteredSuggestions.length > 0 && (
-              <ul className="absolute top-10 left-0 z-10 bg-white text-black border w-full rounded shadow-md max-h-48 overflow-auto">
-                {filteredSuggestions.map((product) => (
-                  <li
-                    key={product._id}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSearchSelect(product)}
-                  >
-                    {product.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
-            onClick={() => router.push("/dashboard")}
-          >
-            <Home className="mr-2" size={16} /> Home
-          </Button>
-          <Button
-            variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
-            onClick={() => router.push("/store/cart")}
-          >
-            <ShoppingCart className="mr-2" size={16} /> Cart ({cartSize})
-          </Button>
-          <Button
-            variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
-            onClick={() => router.push("/store/orders")}
-          >
-            <CreditCard className="mr-2" size={16} /> Orders
-          </Button>
-          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
-            <LogOut className="mr-2" size={16} /> Logout
-          </Button>
-        </div>
-      </nav>
+
+      {/* Navigation Bar */}
+
+      <StoreNavbar />
 
       {/* Store Products */}
       <div className="max-w-6xl mx-auto p-8">
