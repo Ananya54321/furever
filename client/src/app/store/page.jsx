@@ -1,7 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   ShoppingCart,
   Star,
@@ -9,123 +7,146 @@ import {
   LogOut,
   Home,
   CreditCard,
+  Search,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import StoreNavbar from "@/components/pages/store/StoreNavbar";
 import { fetchProducts } from "../../../actions/storeActions";
+import { getAuthenticatedUser } from "../../../actions/loginActions";
+import { buyNow, addToCart as addToCartAction, getCartSize } from "./functions";
 
-const products = [
-  {
-    id: 1,
-    name: "EcoSmart Mug 🌿",
-    price: "$24.99",
-    rating: 4.8,
-    image: "https://source.unsplash.com/300x200/?mug,coffee",
-  },
-  {
-    id: 2,
-    name: "Minimalist Notebook 📖",
-    price: "$14.99",
-    rating: 4.6,
-    image: "https://source.unsplash.com/300x200/?notebook,stationery",
-  },
-  {
-    id: 3,
-    name: "Classic Leather Wallet 👜",
-    price: "$49.99",
-    rating: 4.9,
-    image: "https://source.unsplash.com/300x200/?wallet,leather",
-  },
-  {
-    id: 4,
-    name: "Aesthetic Table Lamp 💡",
-    price: "$59.99",
-    rating: 4.7,
-    image: "https://source.unsplash.com/300x200/?lamp,desk",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import toast from "react-hot-toast";
+
+import useProductStore from "@/lib/zustand";
 
 export default function StorePage() {
-  const [cart, setCart] = useState([]);
+  const [cartSize, setCartSize] = useState(0);
   const [products, setProducts] = useState([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState(null);
 
   const router = useRouter();
 
-  const addToCart = (product) => {
-    setCart([...cart, product]);
+  const addToCart = (productId) => {
+    addToCartAction(user._id, productId);
+    getCartSize(user._id).then((size) => setCartSize(size));
+    toast.success("Product added to cart!");
+  };
+
+  const handleBuyNow = (product) => {
+    localStorage.setItem(
+      "checkoutItem",
+      JSON.stringify({
+        ...product,
+        quantity: 1,
+      })
+    );
+    useProductStore(state => state.setProducts)(products);
+    router.push("/store/checkout");
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (!query) {
+      setFilteredSuggestions([]);
+      return;
+    }
+
+    const suggestions = products.filter((product) => {
+      const inName = product.name.toLowerCase().includes(query);
+      const inTags = product.tags.some((tag) => tag.toLowerCase().includes(query));
+      return inName || inTags;
+    });
+
+    setFilteredSuggestions(suggestions.slice(0, 5)); // Limit suggestions
+  };
+
+  const handleSearchSelect = (product) => {
+    localStorage.setItem("product", JSON.stringify(product));
+    router.push(`/store/product`);
   };
 
   useEffect(() => {
-    fetchProducts().then((products) => setProducts(products));
-
-    let interval;
-    setTimeout(() => {
-      interval = setInterval(() => {
-        console.log("Updating products...", products);
-      }, 2000);
+    fetchProducts().then(setProducts);
+    getAuthenticatedUser().then((currUser) => {
+      setUser(currUser);
+      console.log(currUser);
+      getCartSize(currUser._id).then(setCartSize);
     });
-    setTimeout(() => {
-      clearInterval(interval);
-    }, 10000);
   }, []);
 
   return (
     <div className="min-h-screen bg-[#E3DAC9]">
+
       {/* Navigation Bar */}
 
       <StoreNavbar />
 
-      {/* Store Content */}
+      {/* Store Products */}
       <div className="max-w-6xl mx-auto p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products &&
             products.map((product) => (
               <Card
                 key={product._id}
-                className="bg-[#DAC8AE] shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform"
+                className="bg-white shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform border-0"
                 onClick={() => {
-                  console.log("Product clicked:", product);
                   localStorage.setItem("product", JSON.stringify(product));
                   router.push(`/store/product`);
-                }}>
+                }}
+              >
                 <img
                   src={product.images[0]}
                   alt={product.name}
                   className="w-full h-40 object-cover"
                 />
                 <CardContent className="p-4">
-                  <CardTitle className="text-lg font-semibold text-[#355E3B]">
+                  <CardTitle className="text-lg font-semibold text-[#00693E]">
                     {product.name}
                   </CardTitle>
-                  <p className="text-[#00693E] font-bold text-lg">
-                    {product.price}
-                  </p>
+                  <p className="text-[#00693E] font-bold text-lg">₹{product.price}</p>
                   <div className="flex items-center gap-1 text-[#2E8B57]">
-                    {Array.from({ length: Math.round(product.rating) }).map(
-                      (_, i) => (
-                        <Star key={i} size={16} fill="#A0785A" stroke="none" />
-                      )
-                    )}
+                    {Array.from({ length: Math.round(product.rating) }).map((_, i) => (
+                      <Star key={i} size={16} fill="#A0785A" stroke="none" />
+                    ))}
                   </div>
-                  <Button
-                    className="mt-3 w-full bg-[#2E8B57] hover:bg-[#00693E]"
-                    onClick={() => addToCart(product)}>
-                    Add to Cart <ShoppingCart className="ml-2" size={16} />
-                  </Button>
+
+                  <div className="flex flex-col items-center justify-center gap-2 mt-4 w-full">
+                    <Button
+                      className="w-full bg-[#2E8B57] hover:bg-[#00693E]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product._id);
+                      }}
+                    >
+                      Add to Cart <ShoppingCart className="ml-2" size={16} />
+                    </Button>
+                    <Button
+                      className="w-full bg-[#00693E] hover:bg-[#004d2c] text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBuyNow(product);
+                      }}
+                    >
+                      Buy Now
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
         </div>
 
-        {/* Shipping Promo */}
+        {/* Promo */}
         <div className="mt-10 p-6 bg-[#355E3B] text-[#E3DAC9] rounded-xl text-center">
-          <h2 className="text-2xl font-bold">
-            🚚 Free Shipping on orders over $50!
-          </h2>
+          <h2 className="text-2xl font-bold">🚚 Free Shipping on orders over ₹50!</h2>
           <p className="mt-2 text-sm flex items-center justify-center gap-2">
-            <Truck size={20} /> Order now and receive it within 3-5 business
-            days.
+            <Truck size={20} /> Order now and receive it within 3-5 business days.
           </p>
         </div>
       </div>
